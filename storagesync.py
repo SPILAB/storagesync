@@ -102,35 +102,36 @@ class FilesPathsSync:
         for key, value in self.filesPathsDict.items():
             # prepare the destination file name
             file_destination = self.change_filename_storage(key, self.destination)
-            # Not exist and destination, copy it
-            if ("src" in value) and ("dst" not in value):
+            if self.should_copy_from_source_to_destination(value):
                 self.info_logger.printVerbose("Copy file from %s to %s" % (key, file_destination))
                 if not self.dry_run:
                     self.create_path(os.path.dirname(file_destination))
                     shutil.copyfile(key, file_destination)
-            # Exist only on destination, delete it
-            if ("src" not in value) and ("dst" in value):
-                if self.can_delete:
-                    self.info_logger.printVerbose("Delete file %s" % file_destination)
-                    if not self.dry_run:
-                        os.remove(file_destination)
+            if self.should_delete_in_destination(value):
+                self.info_logger.printVerbose("Delete file %s" % file_destination)
+                if not self.dry_run:
+                    os.remove(file_destination)
 
     def synchronize_paths(self):
         for key, value in self.pathsDict.items():
             # Prepare the destination path
             path_destination = self.change_filename_storage(key, self.destination)
-            # Not exist and destination, create this path
-            if ("src" in value) and ("dst" not in value):
+            if self.should_copy_from_source_to_destination(value):
                 self.create_path(path_destination)
-            # Exist only on destination, delete it
-            if ("src" not in value) and ("dst" in value):
-                if self.can_delete:
-                    self.info_logger.printVerbose("Delete path %s" % path_destination)
-                    if not self.dry_run and os.path.exists(path_destination):
-                        try:
-                            shutil.rmtree(path_destination)
-                        except OSError:
-                            self.info_logger.print("Cannot delete %s" % path_destination)
+            if self.should_delete_in_destination(value):
+                self.info_logger.printVerbose("Delete path %s" % path_destination)
+                if not self.dry_run and os.path.exists(path_destination):
+                    try:
+                        shutil.rmtree(path_destination)
+                    except OSError:
+                        self.info_logger.print("Cannot delete %s" % path_destination)
+
+    @staticmethod
+    def should_copy_from_source_to_destination(value):
+        return ("src" in value) and ("dst" not in value)
+
+    def should_delete_in_destination(self, value):
+        return ("src" not in value) and ("dst" in value) and self.can_delete
 
     def create_path(self, path_destination):
         self.info_logger.printVerbose("Create path %s" % path_destination)
