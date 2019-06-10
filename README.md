@@ -1,17 +1,17 @@
 # storagesync for Windows
 
-
-
-
-
-|1          |=>         |2          |=>         |3          |Done!      |
-|-----------|-----------|-----------|-----------|-----------|-----------|
-|![flash](https://github.com/SPILAB/storagesync/blob/master/Nuvola_devices_usbpendrive_unmount.png)|![flash](https://github.com/SPILAB/storagesync/blob/master/Nuvola_devices_usbpendrive_unmount.png)|Synchronize|Storage|![flash](https://github.com/SPILAB/storagesync/blob/master/Nuvola_devices_usbpendrive_unmount.png)|![flash](https://github.com/SPILAB/storagesync/blob/master/Nuvola_devices_usbpendrive_unmount.png)|
-|Storage A  |Storage B  |Storage A  |Storage B  |Storage A  |Storage B  |
-| dog.png   |cat.png    | dog.png   |  -cat.png |dog.png    |dog.png    |
-| sound.mp3 |sound.mp3  | sound.mp3 |  +dog.png |sound.mp3  |sound.mp3  |
-| new.txt   |           | new.txt   |  sound.mp3|new.txt    |new.txt    |
-|           |           |           |   +new.tx |new.txt    |new.txt    |
+|           1           |           2           |           3           |
+|-----------------------|-----------------------|-----------------------|
+|![flash](https://github.com/SPILAB/storagesync/blob/master/Nuvola_devices_usbpendrive_unmount.png)**≠**![flash](https://github.com/SPILAB/storagesync/blob/master/Nuvola_devices_usbpendrive_unmount.png)|**python storagesync.py A: B: --delete**|![flash](https://github.com/SPILAB/storagesync/blob/master/Nuvola_devices_usbpendrive_unmount.png)**=**![flash](https://github.com/SPILAB/storagesync/blob/master/Nuvola_devices_usbpendrive_unmount.png)|
+|**Storage A**          |**Storage A**          |**Storage A**          |
+|dog.png                |dog.png                |dog.png                |
+|sound.mp3              |sound.mp3              |sound.mp3              |
+|new.txt                |new.txt                |new.txt                |
+|**Storage B**          |**Storage B**          |**Storage B**          |
+|cat.png                |-cat.png               |dog.png                |
+|sound.mp3              |+dog.png               |sound.mp3              |
+|                       |=sound.mp3             |new.txt                |
+|                       |+new.txt               |                       |
 
 # Setup
 storagesync require pypiwin32
