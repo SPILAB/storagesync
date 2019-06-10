@@ -8,7 +8,7 @@ arg_from: letter of the source storage
 arg_from: letter of the destination storage
 -------------------------------------------
 StorageSyn synchronize all files and directories from one storage
-to another. A storage can be hard disk, usb key, etc..
+to another. A storage can be an hard disk, flash drive, etc..
 Example: python storagesync.py E: F:
 This will copy all files and directories of E: to F:,
 then optionally remove all files and directories from F:
