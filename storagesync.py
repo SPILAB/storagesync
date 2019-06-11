@@ -1,7 +1,12 @@
+import logging
 import os
 import shutil
 from argparse import ArgumentParser
 from pathlib import Path
+
+if os.name == 'nt':
+    import win32api
+    import win32con
 
 usage_meg = """python storagesync.py arg_from arg_to
 arg_from: letter of the source storage
@@ -18,43 +23,25 @@ These software is provided as-is, and there are no guarantees that It is bug-fre
 Use it at your own risk!
 """
 
-if os.name == 'nt':
-    import win32api
-    import win32con
-
-
-class InfoLogger:
-
-    def __init__(self, verbose):
-        self.verbose = verbose
-
-    def print(self, message):
-        print(message)
-        return self
-
-    def printVerbose(self, message):
-        if self.verbose:
-            print(message)
-        return self
-
 
 class FilesPathsSync:
 
-    def __init__(self, source, destination, dry_run, can_delete, info_logger):
+    def __init__(self, source, destination, dry_run, can_delete, logger):
         self.source = source
         self.destination = destination
         self.dry_run = dry_run
         self.can_delete = can_delete
-        self.info_logger = info_logger
+        self.logger = logger
         self.pathsDict = dict()
         self.filesPathsDict = dict()
-        self.info_logger.print("Scan source and destination... please wait...")
+        self.logger.info('Scan source and destination... please wait...')
         self.update_files_paths_dict(source, "src")
         self.update_files_paths_dict(destination, "dst")
-        self.info_logger.print("Done.").print("Synchronize %d files... please wait..." % len(self.filesPathsDict))
+        self.logger.info('Done.')
+        self.logger.info("Synchronize %d files... please wait..." % len(self.filesPathsDict))
         self.synchronize_files()
         self.synchronize_paths()
-        self.info_logger.print("Done.")
+        self.logger.info('Done.')
 
     def update_files_paths_dict(self, base_directory, update_value):
         for (dir_path, dir_names, file_names) in os.walk(base_directory):
@@ -103,12 +90,12 @@ class FilesPathsSync:
             # prepare the destination file name
             file_destination = self.change_filename_storage(key, self.destination)
             if self.should_copy_from_source_to_destination(value):
-                self.info_logger.printVerbose("Copy file from %s to %s" % (key, file_destination))
+                self.logger.debug("Copy file from %s to %s" % (key, file_destination))
                 if not self.dry_run:
                     self.create_path(os.path.dirname(file_destination))
                     shutil.copyfile(key, file_destination)
             if self.should_delete_in_destination(value):
-                self.info_logger.printVerbose("Delete file %s" % file_destination)
+                self.logger.debug("Delete file %s" % file_destination)
                 if not self.dry_run:
                     os.remove(file_destination)
 
@@ -119,12 +106,12 @@ class FilesPathsSync:
             if self.should_copy_from_source_to_destination(value):
                 self.create_path(path_destination)
             if self.should_delete_in_destination(value):
-                self.info_logger.printVerbose("Delete path %s" % path_destination)
+                self.logger.debug("Delete path %s" % path_destination)
                 if not self.dry_run and os.path.exists(path_destination):
                     try:
                         shutil.rmtree(path_destination)
                     except OSError:
-                        self.info_logger.print("Cannot delete %s" % path_destination)
+                        self.logger.info("Cannot delete %s" % path_destination)
 
     @staticmethod
     def should_copy_from_source_to_destination(value):
@@ -134,7 +121,7 @@ class FilesPathsSync:
         return ("src" not in value) and ("dst" in value) and self.can_delete
 
     def create_path(self, path_destination):
-        self.info_logger.printVerbose("Create path %s" % path_destination)
+        self.logger.debug("Create path %s" % path_destination)
         if not self.dry_run:
             os.makedirs(path_destination, exist_ok=True)
 
@@ -154,9 +141,12 @@ if __name__ == "__main__":
     parser.add_argument("--delete", action='store_true',
                         help="Delete files and paths present in destination but not in source")
     args = parser.parse_args()
-    activeVerbose = args.dryrun or args.verbose
+
+    log_level = logging.DEBUG if (args.dryrun or args.verbose) else logging.INFO
+    logging.basicConfig(format='%(message)s', level=log_level)
+    log = logging.getLogger(__name__)
     FilesPathsSync(os.path.abspath(args.source),
                    os.path.abspath(args.destination),
                    args.dryrun,
                    args.delete,
-                   InfoLogger(activeVerbose))
+                   log)
