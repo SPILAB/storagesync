@@ -24,14 +24,25 @@ Use it at your own risk!
 """
 
 
+class OSPath:
+
+    def is_hidden(self, path):
+        if os.name == 'nt':
+            attribute = win32api.GetFileAttributes(path)
+            return attribute & (win32con.FILE_ATTRIBUTE_HIDDEN | win32con.FILE_ATTRIBUTE_SYSTEM)
+        else:
+            return path.startswith('.')
+
+
 class FilesPathsSync:
 
-    def __init__(self, source, destination, dry_run, can_delete, logger):
+    def __init__(self, source, destination, dry_run, can_delete, logger, os_path):
         self.source = source
         self.destination = destination
         self.dry_run = dry_run
         self.can_delete = can_delete
         self.logger = logger
+        self.os_path = os_path
         self.pathsDict = dict()
         self.filesPathsDict = dict()
         self.logger.info('Scan source and destination... please wait...')
@@ -52,7 +63,6 @@ class FilesPathsSync:
                     self.update_files_dict(file_path, update_value)
 
     def update_paths_dict(self, file_path, update_value):
-        # Always compare from source
         if not self.path_is_hidden(file_path):
             path_source = self.change_filename_storage(file_path, self.source)
             if path_source in self.pathsDict:
@@ -61,27 +71,20 @@ class FilesPathsSync:
                 self.pathsDict[file_path] = update_value
 
     def update_files_dict(self, file_path, update_value):
-        # Always compare from source
         file_source = self.change_filename_storage(file_path, self.source)
         if file_source in self.filesPathsDict:
             self.filesPathsDict[file_source] += "." + update_value
         else:
             self.filesPathsDict[file_path] = update_value
 
-    @staticmethod
-    def path_is_hidden(path):
+    def path_is_hidden(self, path):
         parts = Path(path).parts
         if len(parts) < 2:
             return False
         path = os.path.join(parts[0])
         for index in range(1, len(parts)):
             path = os.path.join(path, parts[index])
-            if os.name == 'nt':
-                attribute = win32api.GetFileAttributes(path)
-                hidden = attribute & (win32con.FILE_ATTRIBUTE_HIDDEN | win32con.FILE_ATTRIBUTE_SYSTEM)
-            else:
-                hidden = path.startswith('.')
-            if hidden:
+            if self.os_path.is_hidden(path):
                 return True
         return False
 
@@ -149,4 +152,5 @@ if __name__ == "__main__":
                    os.path.abspath(args.destination),
                    args.dryrun,
                    args.delete,
-                   log)
+                   log,
+                   OSPath())
