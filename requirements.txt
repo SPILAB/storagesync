@@ -1,1 +1,1 @@
-pypiwin32
+pypiwin32; platform_system == 'Windows'
