@@ -130,8 +130,12 @@ class FilesPathsSync:
 
     @staticmethod
     def change_filename_storage(key, storage):
-        drive, path = os.path.splitdrive(key)
-        return os.path.join(storage, path)
+        if os.name == 'nt':
+            drive, path = os.path.splitdrive(key)
+            return os.path.join(storage, path)
+        else:
+            path = os.path.join(storage, Path(*Path(key).parts[1:]))
+            return path
 
 
 if __name__ == "__main__":
