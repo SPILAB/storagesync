@@ -1,4 +1,5 @@
 # storagesync for Windows
+[![Build Status](https://travis-ci.com/SPILAB/storagesync.svg?branch=master)](https://travis-ci.com/SPILAB/storagesync)
 
 |           1           |           2           |           3           |
 |-----------------------|-----------------------|-----------------------|
