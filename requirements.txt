@@ -1,1 +1,2 @@
-pypiwin32; platform_system == 'Windows'
+pypiwin32; platform_system=='Windows'
+pyfakefs==3.5.8
