@@ -78,11 +78,9 @@ class FilesPathsSync:
 
     def path_is_hidden(self, path):
         parts = Path(path).parts
-        if len(parts) < 2:
-            return False
-        path = os.path.join(parts[0])
-        for index in range(1, len(parts)):
-            path = os.path.join(path, parts[index])
+        path = ''
+        for part in parts:
+            path = os.path.join(path, part)
             if self.os_path.is_hidden(path):
                 return True
         return False
