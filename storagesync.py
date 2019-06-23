@@ -64,18 +64,17 @@ class FilesPathsSync:
 
     def update_paths_dict(self, file_path, update_value):
         if not self.path_is_hidden(file_path):
-            path_source = self.change_filename_storage(file_path, self.source)
-            if path_source in self.pathsDict:
-                self.pathsDict[path_source] += "." + update_value
-            else:
-                self.pathsDict[file_path] = update_value
+            self.update_dict(self.pathsDict, file_path, update_value)
 
     def update_files_dict(self, file_path, update_value):
-        file_source = self.change_filename_storage(file_path, self.source)
-        if file_source in self.filesPathsDict:
-            self.filesPathsDict[file_source] += "." + update_value
+        self.update_dict(self.filesPathsDict, file_path, update_value)
+
+    def update_dict(self, dict_to_update, file_path, update_value):
+        source_storage = self.change_filename_storage(file_path, self.source)
+        if source_storage in dict_to_update:
+            dict_to_update[source_storage] += "." + update_value
         else:
-            self.filesPathsDict[file_path] = update_value
+            dict_to_update[file_path] = update_value
 
     def path_is_hidden(self, path):
         parts = Path(path).parts
